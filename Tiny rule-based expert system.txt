@@ -1,0 +1,114 @@
+# Practical 5: Tiny Rule-Based Expert System (Class Demo - Not a Doctor)
+# Run: python P5_expert_system.py
+# Library: None (Plain Python 3)
+
+class RuleBasedExpertSystem:
+    def __init__(self):
+        # Knowledge Base: List of rules (IF conditions THEN conclusion)
+        self.rules = [
+            {
+                "id": "R1",
+                "conditions": {"fever", "cough", "body_ache"},
+                "conclusion": "Flu (Influenza)",
+                "advice": "Rest, stay hydrated, and consult a physician if symptoms worsen."
+            },
+            {
+                "id": "R2",
+                "conditions": {"runny_nose", "sneezing", "sore_throat"},
+                "conclusion": "Common Cold",
+                "advice": "Drink warm fluids, gargle with salt water, and get plenty of rest."
+            },
+            {
+                "id": "R3",
+                "conditions": {"fever", "dry_cough", "loss_of_taste_or_smell"},
+                "conclusion": "Viral Respiratory Infection (COVID-like symptoms)",
+                "advice": "Isolate yourself, monitor oxygen levels, and seek medical testing."
+            },
+            {
+                "id": "R4",
+                "conditions": {"sneezing", "itchy_eyes", "runny_nose"},
+                "conclusion": "Seasonal Allergy",
+                "advice": "Avoid dust/pollen triggers and consider consulting a doctor for antihistamines."
+            },
+            {
+                "id": "R5",
+                "conditions": {"headache", "nausea", "sensitivity_to_light"},
+                "conclusion": "Migraine",
+                "advice": "Rest in a quiet, dark room and stay hydrated."
+            },
+            {
+                "id": "R6",
+                "conditions": {"fever", "headache"},
+                "conclusion": "General Viral Fever",
+                "advice": "Monitor body temperature, stay hydrated, and rest."
+            }
+        ]
+        # Working Memory: Stores user facts (symptoms)
+        self.facts = set()
+
+    def ask_symptoms(self):
+        """Interactive interface to gather facts from the user."""
+        print("=" * 60)
+        print("   TINY RULE-BASED EXPERT SYSTEM (CLASS DEMO ONLY)")
+        print("   Disclaimer: Educational purpose only. Not medical advice.")
+        print("=" * 60)
+        print("\nPlease answer with 'y' (yes) or 'n' (no):\n")
+
+        # Extract all unique symptoms from the knowledge base
+        all_symptoms = sorted({symptom for rule in self.rules for symptom in rule["conditions"]})
+
+        for symptom in all_symptoms:
+            readable_name = symptom.replace("_", " ").capitalize()
+            while True:
+                ans = input(f"Do you have {readable_name}? (y/n): ").strip().lower()
+                if ans in ("y", "yes"):
+                    self.facts.add(symptom)
+                    break
+                elif ans in ("n", "no"):
+                    break
+                else:
+                    print("  Invalid input. Please enter 'y' or 'n'.")
+
+    def infer(self):
+        """Forward-chaining inference engine to match facts against rules."""
+        matched_rules = []
+        for rule in self.rules:
+            # Check if all conditions of the rule are present in working memory
+            if rule["conditions"].issubset(self.facts):
+                matched_rules.append(rule)
+        return matched_rules
+
+    def display_results(self, matched_rules):
+        """Outputs conclusions along with rule trace (Explanation Facility)."""
+        print("\n" + "=" * 60)
+        print("INFERENCE RESULTS & EXPLANATION")
+        print("=" * 60)
+
+        if not self.facts:
+            print("No symptoms reported. You appear to be feeling fine!")
+            return
+
+        print(f"Observed Facts (Working Memory): {', '.join(sorted(self.facts))}\n")
+
+        if matched_rules:
+            for rule in matched_rules:
+                cond_str = " AND ".join(sorted(rule["conditions"]))
+                print(f"[Rule Fired: {rule['id']}]")
+                print(f"  Conclusion : {rule['conclusion']}")
+                print(f"  Reasoning  : IF ({cond_str})")
+                print(f"  Suggestion : {rule['advice']}\n")
+        else:
+            print("Conclusion : No exact rule matched your combination of symptoms.")
+            print("Suggestion : Monitor your symptoms and consult a qualified doctor.")
+        print("=" * 60)
+
+
+def main():
+    expert_system = RuleBasedExpertSystem()
+    expert_system.ask_symptoms()
+    results = expert_system.infer()
+    expert_system.display_results(results)
+
+
+if __name__ == "__main__":
+    main()
